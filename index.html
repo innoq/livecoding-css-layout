@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Livecoding CSS Layout</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+
+  </style>
+  <style>
+    /* BASE STYLING: COMMENT IN */
+    /* Colors & Shadow taken from Tailwind CSS: https://tailwindcss.com/docs/customizing-colors#default-color-palette */
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Oxygen, Cantarell, sans-serif;
+
+      --gray-100: #F7FAFC;
+      --gray-200: #EDF2F7;
+      --gray-300: #E2E8F0;
+      --gray-400: #CBD5E0;
+      --gray-500: #A0AEC0;
+      --gray-600: #718096;
+      --gray-700: #4A5568;
+      --gray-800: #2D3748;
+      --gray-900: #1A202C;
+
+      --box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    }
+    .sr-only {
+      clip: rect(1px, 1px, 1px, 1px);
+      clip-path: inset(50%);
+      height: 1px;
+      width: 1px;
+      margin: -1px;
+      overflow: hidden;
+      padding: 0;
+      position: absolute;
+    }
+    .hide {
+      display: none;
+    }
+  </style>
+  <style>
+    /* STEP 1: DEFINE SPACINGS! */
+    :root {
+      --space-xss: 0.25rem;
+      --space-xs: 0.5rem;
+      --space-sm: 0.75rem;
+      --space-md: 1.25rem;
+      --space-lg: 2rem;
+      --space-xl: 3.25rem;
+      --space-xxl: 5.25rem;
+    }
+  </style>
+  <style>
+    /* STEP 2: CSS RESET (COMMENT IN!) */
+    body {
+      margin: 0;
+    }
+    ul, ol {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    h2, h3 {
+      margin: 0;
+    }
+    main > * {
+      padding: var(--space-xs);
+    }
+  </style>
+  <style>
+    /* STEP 3: SEARCH & NEWSLETTER SIGNUPS (COMMENT IN!) */
+
+    .site-search {
+      display: flex;
+    }
+    input {
+      padding: var(--space-xxs);
+      min-height: var(--space-lg);
+      flex-grow: 1;
+      border: 1px solid var(--gray-300);
+    }
+    button {
+      display: flex;
+      align-items: center;
+      background-color: transparent;
+      border: 0;
+      gap: var(--space-xxs);
+      font-size: 1rem;
+      min-height: var(--space-lg);
+    }
+    .btn {
+      display: flex;
+      align-items: center;
+      background-color: var(--gray-200);
+      border: 1px solid var(--gray-300);
+    }
+    .btn-cta {
+      align-self: start;
+    }
+    .site-search .btn {
+      margin-left: -1px;
+    }
+    .newsletter-signup {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm)
+    }
+    .newsletter-signup label {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xxs);
+    }
+    .icon-definitions {
+      display: none;
+    }
+  </style>
+  <style>
+    /* aria-expanded UTILS */
+    .expanded--hidden,
+    .expanded--visible {
+      display: none;
+    }
+    [aria-expanded=true] .expanded--visible {
+      display: block;
+    }
+    [aria-expanded=false] .expanded--hidden {
+      display: block;
+    }
+
+    /* STEP 4: NAVBAR */
+    .navbar .brand,
+    .navbar li {
+      padding: var(--space-sm);
+      color: var(--gray-700);
+    }
+
+    .navbar .brand {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .navbar {
+      box-shadow: var(--box-shadow);
+    }
+
+    .navbar a {
+      text-decoration: none;
+      color: var(--gray-700)
+    }
+    .navbar li:hover {
+      background-color: var(--gray-300);
+    }
+
+    @media screen and (min-width: 40rem) {
+      [is="navbar-toggler"] {
+        display: none;
+      }
+
+      .navbar,
+      .navbar .hide {
+        display: flex;
+      }
+    }
+  </style>
+  <style>
+    /* STEP 5: MAIN GRID & CONTENT STYLING */
+
+    .site-search {
+      align-self: end;
+      position: sticky;
+      top: 0;
+    }
+
+    .newsletter-signup {
+      align-self: start;
+      position: sticky;
+      top: var(--space-xl);
+    }
+
+    @media screen and (min-width: 40rem) {
+      main {
+        display: grid;
+        grid-template-areas:
+          "header search"
+          "content navbar";
+      }
+    }
+
+  </style>
+  <style>
+    /* STEP 6: CARDS */
+    .content {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(15rem, auto));
+      gap: var(--space-sm);
+    }
+
+    .content > * {
+      border: 1px solid var(--gray-300);
+      padding: var(--space-sm);
+      box-shadow: var(--box-shadow);
+    }
+
+
+    .card {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+
+    .card .authors {
+      margin-top: auto;
+    }
+
+    @media screen and (min-width: 40rem) {
+      .content > :first-child {
+        grid-column: span 2;
+        grid-row: span 2;
+      }
+    }
+
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="brand">
+    <span class="logo">😜 Logo</span>
+    <button is="navbar-toggler" hidden data-target="#nav-links">
+      <svg class="icon" role="presentation" width="16" height="16">
+        <use href="#menu" class="expanded--hidden"></use>
+        <use href="#close" class="expanded--visible"></use>
+      </svg>
+      <span class="expanded--hidden">Menu</span>
+      <span class="expanded--visible">Close Menu</span>
+    </button>
+  </div>
+  <ul id="nav-links">
+    <li>
+      <a href="https://www.innoq.com/en/services/">Services</a>
+    </li>
+    <li>
+      <a href="https://www.innoq.com/en/success-stories/">Success Stories</a>
+    </li>
+    <li>
+      <a href="https://www.innoq.com/en/culture/">Culture</a>
+    </li>
+    <li>
+      <a href="https://www.innoq.com/en/magazine/">Magazine</a>
+    </li>
+    <li>
+      <a href="https://www.innoq.com/en/upcoming/">Upcoming</a>
+    </li>
+    <li>
+      <a href="https://www.innoq.com/en/trainings/">Trainings</a>
+    </li>
+  </ul>
+</nav>
+<main>
+  <h1>Magazine</h1>
+  <form class="site-search" action="?search">
+    <label for="search" class="sr-only">Search</label>
+    <input type="text" name="search"><button class="btn" type="submit">
+      <span class="sr-only">Search</span>
+      <svg class="icon" role="presentation" width="16" height="16">
+        <use href="#search"></use>
+      </svg>
+    </button>
+  </form>
+  <ul class="content">
+    <li>
+      <article class="card">
+        <h2>If you like this live coding, have a look at...</h2>
+        <ul>
+          <li>
+            <a href="https://flexboxfroggy.com/">
+              Flexbox Froggy
+            </a>
+          </li>
+          <li>
+            <a href="https://cssgridgarden.com">
+              CSS Grid Garden
+            </a>
+          </li>
+          <li>
+            <a href="https://inclusive-components.design/cards/">
+              Inclusive Components: Cards - Heydon Pickering
+            </a>
+          </li>
+          <li>
+            <a href="https://www.freecodecamp.org/news/the-100-correct-way-to-do-css-breakpoints-88d6a5ba1862/">
+              The 100% correct way to do CSS breakpoints - David Gilbertson
+            </a>
+          </li>
+          <li>
+            Colors and shadows taken from <a href="https://tailwindcss.com/">Tailwind CSS</a>
+          </li>
+        </ul>
+      </article>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/articles/2020/05/domain-driven-design-to-the-code/">Domain-Driven Design to the Code</a>
+        </h2>
+        <h3>Umsetzung des Domänenmodells ohne Technologie-Einfluss</h3>
+        <ul class="authors">
+          <li>Christian Stettler</li>
+        </ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/articles/2020/05/string-vergleich-gegen-timing-angriffe/">String-Vergleich gegen Timing-Angriffe härten</a>
+        </h2>
+        <h3>Sichere Software erstellen</h3>
+        <ul class="authors">
+          <li>Christoph Iserlohn</li>
+        </ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/articles/2020/05/betrieb-automatisieren-mit-kubernetes-operators/">Aus Erfahrung gut</a>
+        </h2>
+        <h3>Den Betrieb automatisieren mit Kubernetes-Operators</h3>
+        <ul class="authors">
+          <li>Sophie Kuna</li>
+          <li>Daniel Bornkessel</li>
+        </ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/articles/2020/05/kubeless-faas-auf-kubernetes/">Kubeless - FaaS auf Kubernetes</a>
+        </h2>
+        <ul class="authors">
+          <li>Jörg Müller</li>
+        </ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/blog/ios-wkwebview-polyfills/">Injecting polyfills for missing JavaScript functions into WKWebView</a>
+        </h2>
+        <ul class="authors"><li>Carmen Burmeister</li></ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/blog/integrale-evolutionaere-organisationen/">Integral Evolutionary Organizations</a>
+        </h2>
+        <h3>A way to organize a company without hierarchies with self management based on evolutionary purpose</h3>
+        <ul class="authors"><li>Martin Weck</li></ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/articles/2020/05/design-und-entwicklungsprinzipien-fuer-ein-besseres-frontend/">Design- und Entwicklungs&shy;prinzipien für ein besseres Frontend</a>
+        </h2>
+        <ul class="authors"><li>Ute Mayer</li></ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/blog/agile-architekturarbeit/">Agile Architekturarbeit</a>
+        </h2>
+        <ul class="authors"><li>David Kamphausen</li></ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/blog/innoqcon-remote-edition-2020/">INNOQcon Remote Edition 2020</a>
+        </h2>
+        <h3>Virtual conferences – why go</h3>
+        <ul class="authors"><li>Martina Meng</li></ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/blog/online-training-setup/">Setup für Online Trainings</a>
+        </h2>
+        <h3>Tools und Technik für Online-Schulungen</h3>
+        <ul class="authors">
+          <li>
+            Gernot Starke
+          </li>
+        </ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/blog/remote-blockchain-training/">Remote Training, funktioniert das?</a>
+        </h2>
+        <h3>Lernen von zu Hause aus</h3>
+        <ul class="authors">
+          <li>
+            Dr. Lars Hupel
+          </li>
+        </ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/blog/scraping-docker-swarm-service-instances-with-prometheus/">Scraping a Docker swarm service with Prometheus</a>
+        </h2>
+        <ul class="authors">
+          <li>
+            Torsten Mandry
+          </li>
+        </ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/articles/2020/04/jsx-java-complate/">JSX-Komponenten mit Java nutzen</a>
+        </h2>
+        <h3>Eine Lingua franca für HTML-Views</h3>
+        <ul class="authors">
+          <li>
+            Michael Vitz
+          </li>
+        </ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/blog/remote-reviews/">Architektur-Reviews remote durchführen</a>
+        </h2>
+        <ul class="authors">
+          <li>
+            David Kamphausen
+          </li>
+          <li>
+            Martin Otten
+          </li>
+        </ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/blog/ts-jasmine-karma/">Cross-platform testing of TypeScript code with Jasmine and Karma</a>
+        </h2>
+        <ul class="authors">
+          <li>
+            Dr. Lars Hupel
+          </li>
+        </ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/articles/2020/04/user-stories-sinnvoll-einsetzen/">User Stories sinnvoll einsetzen</a>
+        </h2>
+        <ul class="authors">
+          <li>
+            Andreas Maier
+          </li>
+        </ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/articles/2020/03/java-dynamic-proxy/">Dynamische Proxys mit dem JDK umsetzen</a>
+        </h2>
+        <h3>Der dynamische Stellvertreter</h3>
+        <ul class="authors">
+          <li>
+            Michael Vitz
+          </li>
+        </ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/blog/gluecklich-ohne-service-mesh/">Glücklich ohne Service Mesh</a>
+        </h2>
+        <h3>Die Basis für sinnvolle Architektur&shy;entscheidungen ist die Auseinandersetzung mit dem Problem und ein guter Überblick über die Optionen.</h3>
+        <ul class="authors">
+          <li>
+            Hanna Prinz
+          </li>
+        </ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="">Effectively Working from Home</a>
+        </h2>
+        <h3>Best practices from two years in home office</h3>
+        <ul class="authors">
+          <li>
+            Dr. Simon Harrer
+          </li>
+          <li>
+            Jochen Christ
+          </li>
+        </ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/articles/2020/03/effectively-working-from-home/">Remote work</a>
+        </h2>
+        <h3>Trust as a foundation for modern work</h3>
+        <ul class="authors">
+          <li>
+            Robert Glaser
+          </li>
+        </ul>
+      </article>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/articles/2020/03/requirements-engineering/">Requirements Engineering</a>
+        </h2>
+        <h3>Requirements the basis of efficient software development</h3>
+        <ul class="authors">
+          <li>
+            Martin Weck
+          </li>
+        </ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/blog/kubernetes-probes/">Kubernetes Probes</a>
+        </h2>
+        <h3>How to use readiness, liveness, and startup probes</h3>
+        <ul class="authors">
+          <li>
+            Christopher Schmidt
+          </li>
+        </ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/blog/go-plugins-with-javascript/">Using Javascript plugins in Go</a>
+        </h2>
+        <h3>More than the sum of its parts</h3>
+        <ul class="authors">
+          <li>
+            Philipp Haußleiter
+          </li>
+        </ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/blog/about-unit-and-integration-tests/">About unit and integration tests</a>
+        </h2>
+        <ul class="authors">
+          <li>
+            Torsten Mandry
+          </li>
+        </ul>
+      </a>
+    </li>
+    <li>
+      <article class="card">
+        <h2>
+          <a href="https://www.innoq.com/en/articles/2020/02/command-control-safe-ddd-release-trains/">Command & Control, SAFe, Domain-driven Design, and Release Trains</a>
+        </h2>
+        <h3>Handling Complex Software Projects</h3>
+        <ul class="authors">
+          <li>
+            Eberhard Wolff
+          </li>
+        </ul>
+      </a>
+    </li>
+  </ul>
+  <form class="newsletter-signup" action="?newsletter">
+    <label>
+      E-Mail
+      <input type="email" name="email" />
+    </label>
+    <label>
+      First Name (optional)
+      <input type="text" name="firstName" />
+    </label>
+    <label>
+      Last Name (optional)
+      <input type="text" name="lastName" />
+    </label>
+    <button class="btn btn-cta">
+      Submit
+    </button>
+  </form>
+</main>
+<script>
+  class NavbarToggler extends HTMLButtonElement {
+    connectedCallback () {
+      this.setAttribute("aria-expanded", "false");
+      this.removeAttribute("hidden");
+      this.target.classList.add("hide");
+
+      this.addEventListener("click", this.toggle.bind(this));
+    }
+
+    toggle () {
+      let classList = this.target.classList;
+      if (classList.contains("hide")) {
+        classList.remove("hide");
+        this.setAttribute("aria-expanded", "true");
+      } else {
+        classList.add("hide");
+        this.setAttribute("aria-expanded", "false");
+      }
+    }
+
+    get target () {
+      return document.querySelector(this.getAttribute("data-target"))
+    }
+  }
+  customElements.define("navbar-toggler", NavbarToggler, { extends: "button" });
+</script>
+<svg class="icon-definitions">
+  <defs>
+    <symbol id="close" aria-hidden="true" focusable="false" data-prefix="fal" data-icon="times" class="svg-inline--fa fa-times fa-w-10" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" width="16" height="16"><path fill="currentColor" d="M193.94 256L296.5 153.44l21.15-21.15c3.12-3.12 3.12-8.19 0-11.31l-22.63-22.63c-3.12-3.12-8.19-3.12-11.31 0L160 222.06 36.29 98.34c-3.12-3.12-8.19-3.12-11.31 0L2.34 120.97c-3.12 3.12-3.12 8.19 0 11.31L126.06 256 2.34 379.71c-3.12 3.12-3.12 8.19 0 11.31l22.63 22.63c3.12 3.12 8.19 3.12 11.31 0L160 289.94 262.56 392.5l21.15 21.15c3.12 3.12 8.19 3.12 11.31 0l22.63-22.63c3.12-3.12 3.12-8.19 0-11.31L193.94 256z"></path></symbol>
+    <symbol id="search" aria-hidden="true" focusable="false" data-prefix="fal" data-icon="search" class="svg-inline--fa fa-search fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="16" height="16"><path fill="currentColor" d="M508.5 481.6l-129-129c-2.3-2.3-5.3-3.5-8.5-3.5h-10.3C395 312 416 262.5 416 208 416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c54.5 0 104-21 141.1-55.2V371c0 3.2 1.3 6.2 3.5 8.5l129 129c4.7 4.7 12.3 4.7 17 0l9.9-9.9c4.7-4.7 4.7-12.3 0-17zM208 384c-97.3 0-176-78.7-176-176S110.7 32 208 32s176 78.7 176 176-78.7 176-176 176z"></path></symbol>
+    <symbol id="menu" aria-hidden="true" focusable="false" data-prefix="fal" data-icon="bars" class="svg-inline--fa fa-bars fa-w-14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="16" height="16"><path fill="currentColor" d="M442 114H6a6 6 0 0 1-6-6V84a6 6 0 0 1 6-6h436a6 6 0 0 1 6 6v24a6 6 0 0 1-6 6zm0 160H6a6 6 0 0 1-6-6v-24a6 6 0 0 1 6-6h436a6 6 0 0 1 6 6v24a6 6 0 0 1-6 6zm0 160H6a6 6 0 0 1-6-6v-24a6 6 0 0 1 6-6h436a6 6 0 0 1 6 6v24a6 6 0 0 1-6 6z"></path></symbol>
+  </defs>
+</svg>
+<style>
+  /* STEP 1: SPACINGS */
+  /* :root {
+    --space-xxs: 0.25rem;
+    --space-xs: 0.5rem;
+    --space-sm: 0.75rem;
+    --space-md: 1.25rem;
+    --space-lg: 2rem;
+    --space-xl: 3.25rem;
+    --space-xxl: 5.25rem;
+  } */
+</style>
+<style>
+  /* STEP 4: NAVBAR - BACKUP */
+
+  /* .navbar {
+    --navbar-flex-direction: column;
+    display: flex;
+    flex-direction: var(--navbar-flex-direction);
+    box-shadow: var(--box-shadow);
+  }
+
+  .navbar .brand {
+    display: flex;
+    padding: var(--space-sm);
+    justify-content: space-between;
+  }
+
+  .navbar ul {
+    display: flex;
+    flex-direction: var(--navbar-flex-direction);
+  }
+
+  .navbar ul > * {
+    padding: var(--space-sm);
+  }
+  .navbar ul > :hover {
+    background-color: var(--gray-300);
+  }
+
+  .navbar a {
+    text-decoration: none;
+    color: var(--gray-700);
+  }
+
+  @media screen and (min-width: 40rem) {
+    .navbar {
+      --navbar-flex-direction: row;
+    }
+
+    [is=navbar-toggler] {
+      display: none;
+    }
+    .navbar ul {
+      display: flex !important;
+    }
+  } */
+</style>
+<style>
+  /* STEP 5: MAIN GRID & CONTENT STYLING */
+
+  /* main {
+    display: grid;
+    grid-template-areas:
+      "heading"
+      "search"
+      "content"
+      "newsletter";
+  }
+
+  main > * {
+    padding: var(--space-sm);
+  }
+
+  h1 {
+    grid-area: heading;
+    margin-top: var(--space-lg);
+  }
+
+  .site-search {
+    grid-area: search;
+    align-self: end;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: white;
+  }
+
+  .content {
+    grid-area: content;
+  }
+
+  .newsletter-signup {
+    grid-area: newsletter;
+    position: sticky;
+    top: var(--space-xl);
+    align-self: start;
+    top: 0;
+    z-index: 1;
+    background-color: white;
+  }
+
+  @media screen and (min-width: 40rem) {
+    main {
+      grid-template-areas:
+        "heading search"
+        "content newsletter";
+      grid-template-columns: 1fr 17rem;
+    }
+  } */
+</style>
+<style>
+  /* STEP 6: CARDS */
+  /* Adapted from https://inclusive-components.design/cards/ */
+
+  /* .content {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, auto));
+    gap: var(--space-sm);
+  }
+  .content > * {
+    display: flex;
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    position: relative;
+    border: 1px solid var(--gray-400);
+    box-shadow: var(--box-shadow);
+    padding: var(--space-sm);
+    width: 100%;
+  }
+
+  .card a::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+  .authors {
+    margin-top: auto;
+  }
+  @media screen and (min-width: 40rem) {
+    .content > li:first-child {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+  } */
+</style>
+</body>
+</html>
